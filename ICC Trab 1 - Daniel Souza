@@ -1,0 +1,418 @@
+#include <stdio.h>
+#include <string.h>
+#define QTD_CONTAS 1
+#define QTD_PECAS 50
+#define QTD_SERVICOS 100
+#define TAM_NOME 100
+
+int ler_conta(char nomes[][TAM_NOME],char carro_nomes[][TAM_NOME],char marca_nomes[][TAM_NOME],
+              char placa_nomes[][TAM_NOME],float codigos[],char contato[][TAM_NOME],int posicao);
+
+int verificar_conta(float codigos[], int quantidade, float cpf);
+
+int editar_conta(char nomes[][TAM_NOME],float codigos[],int posicao);
+
+int ler_peca(char peca_nomes[][TAM_NOME],float p_codigos[],float valor[],int peca_posicao);
+
+int verificar_peca(float peca_codigos[], int peca_quantidade, float peca,float valor[]);
+
+int editar_peca(char peca_nomes[][TAM_NOME],float p_codigos[],int p_posicao, float valor[]);
+
+int realizar_servico(char nomes[][TAM_NOME],char carro_nomes[][TAM_NOME],
+                     char placa_nomes[][TAM_NOME],char marca_nomes[][TAM_NOME],char peca_nomes[][TAM_NOME],int qtdpeca[],float valor_total[],float Kilometragem[],float horas[],float codigos[],int posicao,float peca_codigos[QTD_PECAS],int p_posicao,float valor[],float s_codigos[],int s_posicao);
+
+int servico_conta(char nomes[][TAM_NOME],char carro_nomes[][TAM_NOME],char marca_nomes[][TAM_NOME],
+                  char placa_nomes[TAM_NOME],char contato[][TAM_NOME],char placa_codigos[QTD_CONTAS][TAM_NOME],int posicao,float s_codigos[],int s_posicao,float km[QTD_SERVICOS],float horas[QTD_SERVICOS],int qtdpeca[QTD_SERVICOS],float valor_total[QTD_SERVICOS]);
+
+int main()
+{
+    float codigos[QTD_CONTAS],cpf;
+    float peca_codigos[QTD_PECAS],peca;
+    float valor[QTD_PECAS];
+    float custo_total[QTD_PECAS];
+    float valor_total[QTD_SERVICOS];
+    float kilometragem[QTD_SERVICOS];
+    float horas[QTD_SERVICOS];
+    float s_codigos[QTD_SERVICOS],serv;
+    int p_proprietarios = 0,servicos = 0,opcao;
+    int peca_proprietarios = 0, p_opcao;
+    int qtdpeca[QTD_SERVICOS];    
+    int p_servicos = 0;
+    int quantidade;
+    char Nomes[QTD_CONTAS][TAM_NOME],Carros[QTD_CONTAS][TAM_NOME],contato[QTD_CONTAS][TAM_NOME],
+    Marca[QTD_CONTAS][TAM_NOME],Placa[QTD_CONTAS][TAM_NOME];
+    char peca_Nomes[QTD_PECAS][TAM_NOME];
+    char buscar_placa[TAM_NOME];
+    char placa_codigos[QTD_CONTAS][TAM_NOME];
+
+    do
+    {
+    printf("- - - - - - - - - - - - - - - - - - - - - - - - - ");
+    printf("\n * * * * * * - OFICINA DOIS IRMAOS - * * * * * *");
+    printf("\n- - - - - - - - - - - - - - - - - - - - - - - - - \n");
+    printf("Selecione uma opcao:\n");
+    printf("1 - Cadastro de Proprietario \n");
+    printf("2 - Cadastrar Peca:\n");
+    printf("3 - Editar Proprietario:\n");
+    printf("4 - Editar Peca:\n");
+    printf("5 - Realizar servico no carro:\n");
+    printf("6 - Relatorios:\n");
+    printf("0 - Sair\n\n");
+
+    scanf("%d", &opcao);
+    
+    switch(opcao)
+    {
+        case 1:
+            if(p_proprietarios < QTD_CONTAS)
+            {
+                 p_proprietarios = ler_conta(Nomes,Carros,Marca,Placa,codigos,contato,p_proprietarios);
+            } else {
+                printf("\n\nATENCAO! Limite Maximo de Proprietarios Cadastrados!\n\n");
+
+            }
+            break;
+
+        case 2:
+            if(peca_proprietarios < QTD_PECAS)
+            {
+                peca_proprietarios = ler_peca(peca_Nomes,peca_codigos,valor,peca_proprietarios);
+            } else {
+                printf("\n\nATENCAO! Limite Maximo de Pecas Cadastradas!\n\n");
+            }
+            break;
+
+        case 3:
+            editar_conta(Nomes,codigos,p_proprietarios);
+            break;
+
+        case 4:
+            editar_peca(peca_Nomes,peca_codigos,peca_proprietarios,valor);
+            break;
+
+        case 5:
+            if(p_servicos < QTD_SERVICOS)
+            {
+              p_servicos = realizar_servico(Nomes,Carros,Placa,Marca,peca_Nomes,qtdpeca,
+                                            valor_total,kilometragem,horas,codigos,p_proprietarios,peca_codigos,peca_proprietarios,valor,s_codigos,p_servicos);
+            }else{
+            printf("\n\nATENCAO! Limite Maximo de Servicos Cadastrados!\n\n");
+            }
+            break;
+
+        case 6:
+            servico_conta(Nomes,Carros,Marca,buscar_placa,contato,Placa,p_proprietarios,s_codigos,
+                          p_servicos,kilometragem,horas,qtdpeca,valor_total);
+            break;
+
+        case 0:
+            printf("Saindo do programa...\n");
+            break;
+
+        default:
+            printf("Opcao invalida!\n");
+    }
+    }
+    while(opcao != 0);
+}
+
+int ler_conta(char nomes[][TAM_NOME], char carro_nomes[][TAM_NOME], char marca_nomes[][TAM_NOME],
+              char placa_nomes[][TAM_NOME], float codigos[], char contato [][TAM_NOME], int posicao)
+{
+    float cpf;
+
+    printf("Digite o CPF do Proprietario: ");
+    scanf("%f", &cpf);
+
+    if(verificar_conta(codigos, posicao, cpf) == -1)
+    {
+        codigos[posicao] = cpf;
+        printf("Digite nome: ");
+        scanf("%s", nomes[posicao]);
+        printf("Digite o contato do cliente: ");
+        scanf("%s", contato[posicao]);
+        printf("Digite a Marca do carro: ");
+        scanf("%s", marca_nomes [posicao]);
+        printf("Digite o nome do carro: ");
+        scanf("%s", carro_nomes[posicao]);
+        printf("Digite a Placa do carro: ");
+        scanf("%s", placa_nomes [posicao]);
+        return posicao + 1;
+    }
+    else
+    {
+        printf("\n\nATENCAO! Este Proprietario ja possui cadastro no sistema!\n\n");
+        return posicao;
+    }
+}
+
+int verificar_conta(float codigos[], int quantidade, float cpf)
+{
+    int i;
+
+    for(i=0; i<quantidade; i++)
+    {
+        if( cpf == codigos[i])
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+int verificar_placa(char placa_codigos[QTD_CONTAS][TAM_NOME], int placa_quantidade,
+                    char placa_nomes[TAM_NOME])
+{
+    int i;
+
+    for(i=0; i<placa_quantidade; i++)
+    {
+        if(strcmp(placa_codigos[i], placa_nomes) == 0)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int verificar_servico(float s_codigos[], int s_quantidade, float serv)
+{
+    int i;
+
+    for(i=0; i<s_quantidade; i++)
+    {
+        if(serv == s_codigos[i])
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int editar_conta(char nomes[][TAM_NOME], float codigos[], int posicao)
+{
+    float cpf;
+    int i;
+
+    printf("Digite o CPF do Proprietario: ");
+    scanf("%f", &cpf);
+
+    i = verificar_conta(codigos, posicao, cpf);
+    if(verificar_conta(codigos, posicao, cpf) == -1)
+    {
+        printf("Proprietario nao encontrado!\n");
+        return posicao;
+    }
+    else
+    {
+        codigos[posicao] = cpf;
+        printf("\n\nPROPRIETARIO ENCONTRADO, MUDE OS DADOS: !!\n\n");
+        printf("O nome atual eh: %s\n",nomes[i]);
+        printf("Digite novo nome: ");
+        scanf("%s", nomes[i]);
+        return posicao+1;
+    }
+}
+
+int ler_peca(char peca_nomes[][TAM_NOME], float peca_codigos[QTD_PECAS], float valor[],
+             int p_posicao)
+{
+    float peca;
+
+    printf("Digite o Codigo da peca: ");
+    scanf("%f", &peca);
+
+    if(verificar_peca(peca_codigos, p_posicao, peca, valor) == -1)
+    {
+        peca_codigos[p_posicao] = peca;
+        printf("Digite o nome da peca: ");
+        scanf("%s", peca_nomes[p_posicao]);
+        printf("Digite o valor da peca: ");
+        scanf("%f",&valor[p_posicao]);
+        return p_posicao + 1;
+    }
+    else
+    {
+        printf("\n\nATENCAO! Esta Peca ja possui cadastro no sistema!\n\n");
+        return p_posicao;
+    }
+}
+
+int verificar_peca(float peca_codigos[QTD_PECAS], int peca_quantidade, float peca,float valor[])
+{
+    int i;
+
+    for(i=0; i<peca_quantidade; i++)
+    {
+        if( peca == peca_codigos[i])
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int editar_peca(char peca_nomes[][TAM_NOME], float peca_codigos[QTD_PECAS], int p_posicao,
+                float valor[])
+{
+    float peca;
+    char cCodigo;
+    int i;
+    int v;
+
+    printf("Digite o Codigo da Peca: ");
+    scanf("%f", &peca);
+
+    i = verificar_peca(peca_codigos, p_posicao, peca, valor);
+    v = verificar_peca(peca_codigos, p_posicao, peca, valor);
+
+    if(verificar_peca(peca_codigos, p_posicao, peca,valor) == -1)
+    {
+        printf("Peca nao encontrada!\n");
+        return p_posicao;
+    }
+    else
+    {
+        peca_codigos[p_posicao] = peca;
+        printf("\n\n PECA ENCONTRADA, MUDE OS DADOS!!\n\n");
+        printf("Digite N para editar nome e V para editar valor ");
+		printf("\nPor favor digite [N/V]: ");
+		scanf("%s", &cCodigo);
+        if(cCodigo == 'N' || cCodigo == 'n')
+        {
+            printf("O nome atual eh: %s\n", peca_nomes[i]);
+		    printf("Digite o novo nome da peca: ");
+            scanf("%s", peca_nomes[i]);
+            return p_posicao+1;
+		}
+        else if(cCodigo == 'V' || cCodigo == 'v')
+        {
+            printf("O valor atual eh: %.2f\n",valor[v]);
+            printf("Digite o novo valor da peca: ");
+            scanf("%f", &valor[v]);
+            return p_posicao+1;
+        }
+    } 
+    return p_posicao+1;
+}
+
+int realizar_servico(char nomes[][TAM_NOME],char carro_nomes[][TAM_NOME],
+                     char placa_nomes[][TAM_NOME],char marca_nomes[][TAM_NOME],char peca_nomes[][TAM_NOME],int qtdpeca[],float valor_total[],float Kilometragem[],float horas[],float codigos[],int posicao,float peca_codigos[QTD_PECAS],int p_posicao,float valor[],float s_codigos[],int s_posicao)
+{
+
+    float cpf, serv, peca, custo_total, aux=0;
+    int i, v, f;
+    int cont = 0;
+
+    printf("Digite o CPF do Proprietario: ");
+    scanf("%f", &cpf);
+
+    i = verificar_conta(codigos, posicao, cpf);
+
+    if(verificar_conta(codigos, posicao, cpf) == -1)
+    {
+        printf("Proprietario nao encontrado.\n");
+        return posicao;
+    }
+    else
+    {
+        peca_codigos[p_posicao] = peca;
+        printf("\n\nPROPRIETARIO ENCONTRADO,DADOS ABAIXO !!\n\n");
+        printf("O nome do proprietario: %s\n",nomes[i]);
+        printf("Carro do proprietario: %s\n",carro_nomes[i]);
+        printf("Marca do carro: %s\n",marca_nomes[i]);
+        printf("Placa do carro: %s\n",placa_nomes[i]);
+        printf("Digite o Codigo de Realizacao de Servico: ");
+        scanf("%f", &serv);
+        
+        if(verificar_servico(s_codigos,s_posicao,serv) == -1)
+        {
+            s_codigos[s_posicao] = serv;
+            printf("Digite a Kilometragem do carro: ");
+            scanf("%f", &Kilometragem[s_posicao]);
+            printf("Digite a duracao em horas do servico: ");
+            scanf("%f", &horas[s_posicao]);
+            printf("Digite a quantidade de pecas nescessarias para o servico: ");
+            scanf("%d",&qtdpeca[s_posicao]);
+            if (qtdpeca[s_posicao] > 5)
+            {
+                printf("Valor invalido!");
+                return s_posicao;
+                }else{
+                    while(cont<qtdpeca[s_posicao])
+                    {
+                        printf("Digite o codigo da Peca: ");
+                        scanf("%f",&peca);
+                        
+                        if(verificar_peca(peca_codigos, p_posicao,peca,valor) == -1)
+                        {
+                            v = verificar_peca(peca_codigos, p_posicao,peca,valor);
+                            printf("Peca nao encontrada!\n");
+                            return p_posicao;
+                        }
+                        else
+                        {
+                        peca_codigos[p_posicao] = peca;
+                        v = verificar_peca(peca_codigos, p_posicao,peca,valor);
+                        aux += valor[v];
+                        custo_total = aux + (aux*0.10) + (horas[s_posicao] * 30);
+                        valor_total[s_posicao] = custo_total;
+                        }
+                        cont++;
+                    }
+                    printf("O custo total do servico foi: %.2f\n",custo_total);
+                    return s_posicao+1;
+                }
+
+    }else{
+            printf("\n\nATENCAO! Este servico ja possui cadastro no sistema!\n\n");
+            return s_posicao;
+        }
+    }
+}
+
+int servico_conta(char nomes[][TAM_NOME],char carro_nomes[][TAM_NOME],char marca_nomes[][TAM_NOME],
+                  char placa_nomes[TAM_NOME],char contato[][TAM_NOME],char placa_codigos[QTD_CONTAS][TAM_NOME],int posicao,float s_codigos[],int s_posicao,float km[QTD_SERVICOS],float horas[QTD_SERVICOS],int qtdpeca[QTD_SERVICOS],float valor_total[QTD_SERVICOS])
+{
+    float serv;
+    int placa;
+    int i;
+    int v;
+
+    printf("Digite a placa do carro: ");
+    scanf("%s",placa_codigos[posicao]);
+    strcpy(placa_nomes,placa_codigos[posicao]);
+
+    i = verificar_placa(placa_codigos, posicao, placa_nomes);
+    
+    if(verificar_placa(placa_codigos,posicao, placa_nomes) == -1)
+    {
+        printf("Proprietario nao encontrado.\n");
+        return posicao;
+    }else{
+        printf("\n\nPROPRIETARIO ENCONTRADO, DADOS ABAIXO: !!\n\n");
+        printf("O NOME do proprietario: %s\n",nomes[i]);
+        printf("O NUMERO DE CONTATO do proprietario: %s\n",contato[i]);
+        printf("O MARCA do carro: %s\n",marca_nomes[i]);
+        printf("O NOME do carro: %s\n",carro_nomes[i]);
+        printf("\nDigite o codigo do servico: ");
+		scanf("%f",&s_codigos[s_posicao]);
+
+		serv = s_codigos[s_posicao];
+
+		v = verificar_servico(s_codigos,s_posicao,serv);
+
+		if(verificar_servico(s_codigos,s_posicao,serv) == -1)
+        {
+			printf("\nCodigo Servico invalido.\n");
+			return s_posicao;
+		}else{
+			printf("O KILOMETRAGEM do carro: %.2f\n",km[v]);
+			printf("A QUANTIDADE de horas de servico: %.2f\n",horas[v]);
+			printf("A QUANTIDADE de pecas utilizadas no servico: %d\n",qtdpeca[v]);
+			printf("O VALOR total do servico: %.2f\n",valor_total[v]);
+			printf("O CODIGO do servico: %.0f\n",s_codigos[s_posicao]);
+			return s_posicao+1;
+		}
+        return posicao+1;
+    }
+}
