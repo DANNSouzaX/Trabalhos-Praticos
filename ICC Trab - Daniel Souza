@@ -1,0 +1,448 @@
+#include <stdio.h>
+#include <string.h>
+#include <Stdlib.h>
+
+#define QTD_equip 4
+#define TAM_NOMES 100
+#define QTD_chales 20
+#define QTD_reserva 100
+#define QTD_equip_chale 1
+
+int cadastrar_equipamento(char equipamentos[QTD_equip][TAM_NOMES],float valor[],int posicao)
+{
+    if(posicao < QTD_equip)
+    {
+        printf("Equipamentos disponiveis: \n1-Ar-condicionado\n2-Ventilador de teto\n3-TV\n4-Frigobar\n\n");
+        printf("Digite nome do Equipamento: ");
+        scanf(" %[^\n]", equipamentos[posicao]);
+        printf("Digite o valor do equipamento: ");
+        scanf("%f",&valor[posicao]);
+        return posicao + 1;
+    }
+    else
+    {
+        printf("Limite maximo atingido\n");
+        return posicao;
+    }
+}
+int buscar_equipamentos(char equipamentos[QTD_equip][TAM_NOMES],float valor[],int posicao, char nome[])
+{
+    int i;
+    for(i=0; i <posicao; i++)
+    {
+        if( strcmp(equipamentos[i], nome) == 0 )
+        {
+           return i;
+        }
+    }
+    return -1;
+}
+void editar_equipamento(char equipamentos[QTD_equip][TAM_NOMES],float valor[],int posicao)
+{
+    char nome[TAM_NOMES];
+    int editado;
+
+    printf("Digite nome do equipamento: ");
+    scanf(" %[^\n]", nome);
+    editado = buscar_equipamentos(equipamentos,valor,posicao,nome);
+
+    if(editado != -1)
+    {
+        printf("Digite o novo nome do equipamento: ");
+        scanf(" %[^\n]", equipamentos[editado]);
+        printf("Digite o novo valor do equipamento: ");
+        scanf("%f\n",&valor[editado]);
+
+       printf("Sucesso nome alterado, novo nome: %s\n",equipamentos[editado]);
+       printf("Sucesso valor alterado, novo valor: %.2f",valor[editado]);
+    }
+    else
+    {
+        printf("Equipamento nao encontrado\n");
+    }
+}
+int buscar_chale(int codigo_chale[],float valor_diaria[],float valor[],int posicao_chales,int codigo)
+{
+    int i;
+    for(i=0;i<posicao_chales;i++)
+    {
+        if(codigo == codigo_chale[i])
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+int cadastrar_chales(int codigo_chale[QTD_chales],float valor_diaria[],int qtd_equipamentos[QTD_equip][QTD_equip_chale],
+char equipamentos[QTD_equip][TAM_NOMES],int num_equipamentos[QTD_chales],float valor[],int posicao_chales,int posicao_equipamento)
+{
+    int quantidade,i,buscar,codigo;
+    int v_equip;
+    char nome_equip[TAM_NOMES];
+    if(posicao_chales < QTD_chales)
+    {
+        printf("Digite o codigo do chale: ");
+        scanf("%d",&codigo);
+        if(buscar_chale(codigo_chale,valor_diaria,valor,posicao_chales,codigo)== -1)
+           {
+        codigo_chale[posicao_chales] = codigo;
+        printf("Digite o valor da diaria do chale: ");
+        scanf("%f",&valor_diaria[posicao_chales]);
+        printf("Digite a quantidade de equipamentos do chale: ");
+        scanf("%d",&quantidade);
+        if(quantidade > 1)
+        {
+            printf("So e possivel cadastrar um equipamento no chale...voltando ao menu");
+             return posicao_chales;
+        }
+        for(i=0;i<quantidade; i++)
+        {
+            printf("Digite o nome do equipamento: ");
+            scanf("%s",nome_equip);
+            buscar = buscar_equipamentos(equipamentos,valor,posicao_equipamento,nome_equip);
+            if(buscar != -1)
+            {
+                qtd_equipamentos[posicao_chales][num_equipamentos[posicao_chales]]=buscar;
+                num_equipamentos[posicao_chales]++;
+
+            }
+            else
+            {
+                printf("Equipamento nao encontrado");
+                num_equipamentos[posicao_chales]=0;
+                return posicao_chales;
+            }
+           }
+        }
+        else
+    {
+        printf("\n\nATENCAO! Este chale ja possui cadastro no sistema!..voltando ao menu\n\n");
+        return posicao_chales;
+    }
+        return posicao_chales+1;
+        }
+
+      else
+       {
+        printf("Limite maximo atingido\n");
+        return posicao_chales;
+       }
+    }
+void editar_chale(char equipamentos[QTD_equip][TAM_NOMES],int num_equipamentos[QTD_chales],int codigo_chale[QTD_chales],
+int qtd_equipamentos[QTD_equip][QTD_equip_chale],float valor[],float valor_diaria[],int posicao_chales,int posicao_equipamento)
+{
+
+    int editado,buscar,codigo;
+    char nome[TAM_NOMES];
+    printf("Digite o codigo do chale: ");
+    scanf("%d",&codigo);
+    editado = buscar_chale(codigo_chale,valor_diaria,valor,posicao_chales,codigo);
+    if(editado != -1)
+    {
+        printf("Sucesso,chale encontrado");
+        printf("Digite o novo codigo do chale: ");
+        scanf("%d",&codigo_chale[editado]);
+        printf("Digite o novo valor da diaria: ");
+        scanf("%f",&valor_diaria[editado]);
+        printf("Digite o nome do equipamento do chale: ");
+        scanf("%s",nome);
+        buscar = buscar_equipamentos(equipamentos,valor,posicao_equipamento,nome);
+        if(buscar != -1)
+        {
+            printf("Sucesso equipamento encontrado\n");
+            printf("Digite o novo equipamento do chale: ");
+            scanf("%s",equipamentos[editado]);
+        printf("Sucesso codigo alterado, novo codigo: %d\n",codigo_chale[editado]);
+        printf("Sucesso valor alterado, novo valor: %.2f\n",valor_diaria[editado]);
+        printf("equipamento editado,novo equipamento do chale: %s\n",equipamentos[editado]);
+
+        }
+
+        else
+        {
+            printf("Equipamento nao encontrado\n");
+        }
+    }
+    else
+    {
+        printf("chale nao encontrado\n");
+    }
+}
+int buscar_reserva(int codigo_reserva[QTD_reserva],int r_periodo[],int posicao_reservas,int codigo_reservas)
+{
+    int i;
+    for(i=0;i<posicao_reservas;i++)
+    {
+        if(codigo_reservas == codigo_reserva[i])
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+int realizar_reserva(char equipamentos[QTD_equip][TAM_NOMES],int num_equipamentos[QTD_chales],int codigo_chale[QTD_chales],int codigo_reserva[QTD_reserva],
+int qtd_equipamentos[QTD_equip][QTD_equip_chale],float valor[],int r_periodo[],
+float valor_diaria[],int posicao_chales,int posicao_equipamento,int posicao_reservas)
+{
+
+    int buscar,codigo,codigo_reservas;
+    if(posicao_reservas < QTD_reserva)
+    {
+    printf("Digite o codigo do chale para realizar a reserva: ");
+    scanf("%d",&codigo);
+    buscar = buscar_chale(codigo_chale,valor_diaria,valor,posicao_chales,codigo);
+    if(buscar != -1)
+        {
+        codigo_reserva[posicao_reservas] = codigo_reservas;
+        printf("Sucesso,chale encontrado\n");
+        printf("Digite o codigo da reserva para o chale escolhido: ");
+        scanf("%d",&codigo_reservas);
+        if(buscar_reserva(codigo_reserva,r_periodo,posicao_reservas,codigo)== -1)
+           {
+            codigo_reserva[posicao_reservas] = codigo_reservas;
+            printf("Digite a quantidade de dias da reserva: ");
+            scanf("%d", &r_periodo[posicao_reservas]);
+            return posicao_reservas+1;
+           }
+        else
+         {
+        printf("\n\nATENCAO! Este chale ja possui reserva no sistema!..voltando ao menu\n\n");
+        return posicao_reservas;
+         }
+           }
+    else
+    {
+        printf("chale nao encontrado\n");
+    }
+ }
+    else
+       {
+        printf("Limite maximo de reservas atingido\n");
+        return posicao_reservas;
+       }
+}
+void editar_reserva(char equipamentos[QTD_equip][TAM_NOMES],int num_equipamentos[QTD_chales],int codigo_chale[QTD_chales],int codigo_reserva[QTD_reserva],
+int qtd_equipamentos[QTD_equip][QTD_equip_chale],float valor[],int r_periodo[],
+float valor_diaria[],int posicao_chales,int posicao_equipamento,int posicao_reservas)
+{
+
+    int editado,buscar,codigo_reservas;
+    printf("Digite o codigo de reserva: ");
+    scanf("%d",&codigo_reservas);
+    editado= buscar_reserva(codigo_reserva,r_periodo,posicao_reservas,codigo_reservas);
+    if(editado != -1)
+    {
+        printf("Sucesso,reserva encontrada");
+        printf("Digite o novo codigo de reserva: ");
+        scanf("%d",&codigo_reserva[editado]);
+        printf("Digite a nova quantidade de dias: ");
+        scanf("%d",&r_periodo[editado]);
+        printf("Sucesso codigo de reserva alterado, novo codigo: %d\n",codigo_reserva[editado]);
+        printf("Sucesso valor de dias alterado, novo valor: %d\n",r_periodo[editado]);
+
+
+    }
+    else
+    {
+        printf("reserva nao encontrado\n");
+    }
+}
+float realizar_pagamento_reserva(char equipamentos[QTD_equip][TAM_NOMES],int num_equipamentos[QTD_chales],int codigo_chale[QTD_chales],int codigo_reserva[QTD_reserva],
+int qtd_equipamentos[QTD_equip][QTD_equip_chale],float valor[],int r_periodo[],
+float valor_diaria[],int posicao_chales,int posicao_equipamento,int posicao_reservas,int posicao_pagamentos)
+{
+    int pagamento,codigo_reservas,codigo,i,v;
+    float custo_total,aux=0,v_equip=0,valor_pagamento=0,troco=0,realizar_pagamento;
+    int v_dia=0;
+    int buscar;
+    printf("Digite o codigo de reserva para realizar pagamento: ");
+    scanf("%d",&codigo_reservas);
+    pagamento = buscar_reserva(codigo_reserva,r_periodo,posicao_reservas,codigo_reservas);
+
+    if(pagamento != -1)
+    {
+        printf("Sucesso,reserva encontrada\n");
+        printf("Digite o codigo do chale: ");
+        scanf("%d",&codigo);
+        i = buscar_chale(codigo_chale,valor_diaria,valor,posicao_chales,codigo);
+        v= buscar_reserva(codigo_reserva,r_periodo,posicao_reservas,codigo_reservas);
+        if(buscar_chale(codigo_chale,valor_diaria,valor,posicao_chales,codigo)== -1)
+        {
+            printf("chale nao encontrado.\n");
+            return posicao_pagamentos;
+        }
+        else
+        {
+        printf("\n\n CHALE ENCONTRADO,DADOS ABAIXO !!\n\n");
+        printf("Codigo da Reserva: %d\n",codigo_reserva[i]);
+        printf("Equipamento do chale: %s\n",equipamentos[i]);
+        printf("Quantidade de dias: %d\n",r_periodo[v]);
+        printf("valor diaria: %.2f\n",valor_diaria[i]);
+        printf("Valor do equipamento: %.2f\n",valor[i]);
+        }
+        aux += valor_diaria[i];
+        v_equip+= valor[i];
+        v_dia+= r_periodo[v];
+        custo_total = aux * v_dia + v_equip;
+        printf("Valor total do pagamento: %.2f\n",custo_total);
+        printf("Digite valor do pagamento:\n");
+        scanf("%f",&realizar_pagamento);
+        codigo_reserva[pagamento]=realizar_pagamento;
+        if(realizar_pagamento< custo_total)
+        {
+            printf("Valor insuficiente para realizar pagamento\n");
+            return posicao_pagamentos;
+        }
+        else if(realizar_pagamento == custo_total)
+        {
+            printf("Pagamento realizado com sucesso\n");
+            return posicao_reservas-1;
+        }
+            if(realizar_pagamento > custo_total)
+            {
+                printf("Pagamento realizado com sucesso\n");
+                troco= custo_total-pagamento;
+                printf("Troco do valor pago: %.2f",troco);
+                return posicao_pagamentos+1;
+
+            }
+        return posicao_pagamentos+1;
+}
+    else
+    {
+        printf("reserva nao encontrada\n");
+    }
+}
+void listar_equipamentos(char equipamentos[QTD_equip][TAM_NOMES],float valor[],int posicao)
+{
+    int i=0,j=0;
+    while(i<4)
+   {
+    printf("Equipamento %d: %s\n",i+1,equipamentos[i]);
+    printf("Valor:%.2f\n",valor[i]);
+    i++;
+   }
+}
+void listar_chale(char equipamentos[QTD_equip][TAM_NOMES],int num_equipamentos[QTD_chales],int codigo_chale[QTD_chales],int codigo_reserva[QTD_reserva],
+int qtd_equipamentos[QTD_equip][QTD_equip_chale],float valor[],int r_periodo[],
+float valor_diaria[],int posicao_chales,int posicao_equipamento,int posicao_reservas)
+{
+    int i=0,v=0;
+    while(i<QTD_chales)
+   {
+    printf("Chale numero %d:\n",i+1);
+    i++;
+    printf("Valor da diaria:%.2f\n",valor_diaria[i]);
+    i++;
+    printf("Equipamento: %s\n",equipamentos[i]);
+    i++;
+    printf("Codigo da Reserva: %d\n",codigo_reserva[i]);
+    i++;
+   }
+}
+float listar_reserva(char equipamentos[QTD_equip][TAM_NOMES],int num_equipamentos[QTD_chales],int codigo_chale[QTD_chales],int codigo_reserva[QTD_reserva],
+int qtd_equipamentos[QTD_equip][QTD_equip_chale],float valor[],int r_periodo[],
+float valor_diaria[],int posicao_chales,int posicao_equipamento,int posicao_reservas,int posicao_pagamentos)
+{
+    int pagamento,codigo_reservas,codigo,i,v;
+    int buscar;
+    printf("Digite o codigo de reserva para pesquisa: ");
+    scanf("%d",&codigo_reservas);
+    pagamento = buscar_reserva(codigo_reserva,r_periodo,posicao_reservas,codigo_reservas);
+
+    if(pagamento != -1)
+    {
+        printf("Sucesso,reserva encontrada\n");
+        printf("Digite o codigo do chale: ");
+        scanf("%d",&codigo);
+        i = buscar_chale(codigo_chale,valor_diaria,valor,posicao_chales,codigo);
+        v= buscar_reserva(codigo_reserva,r_periodo,posicao_reservas,codigo_reservas);
+        if(buscar_chale(codigo_chale,valor_diaria,valor,posicao_chales,codigo)== -1)
+        {
+            printf("chale nao encontrado.\n");
+            return posicao_pagamentos;
+        }
+        else
+        {
+        printf("\n\n CHALE ENCONTRADO,DADOS ABAIXO !!\n\n");
+        printf("Codigo da Reserva: %d\n",codigo_reserva[i]);
+        printf("Equipamento do chale: %s\n",equipamentos[i]);
+        printf("Quantidade de dias: %d\n",r_periodo[v]);
+        printf("valor diaria: %.2f\n",valor_diaria[i]);
+        printf("Valor do equipamento: %.2f\n",valor[i]);
+        }
+    }
+}
+int main()
+{
+    int opcao, i_equipamento = 0,i_chales = 0,i_reservas=0,i_pagamentos=0;
+    char nome_equipamento[QTD_equip][TAM_NOMES],nome[TAM_NOMES];
+    float valor[QTD_equip],v_diaria[QTD_chales];
+    int codigo_chale[QTD_chales],r_periodo[QTD_reserva],codigo_reserva[QTD_chales];
+    int qtd_equipamentos[QTD_equip][QTD_equip_chale];
+    int num_equipamentos[QTD_chales]={0};
+
+do
+    {
+    printf("- - - - - - - - - - - - - - - - - - - - - - - - - ");
+    printf("\n * * * * * * - Montes Quentes - * * * * * *");
+    printf("\n- - - - - - - - - - - - - - - - - - - - - - - - - \n");
+        printf("1 - Cadastrar Equipamento\n");
+        printf("2 - Editar Equipamento\n");
+        printf("3 - Cadastrar Chale\n");
+        printf("4 - Editar Chale\n");
+        printf("5 - Fazer Reserva\n");
+        printf("6 - Editar Reserva\n");
+        printf("7 - Realizar pagamento de Reserva\n");
+        printf("8 - Listar Equipamento\n");
+        printf("9 - Listar Chales\n");
+        printf("10- Listar reservas\n");
+        printf("0 - Sair\n");
+        scanf("%d", &opcao);
+        switch(opcao)
+        {
+        case 1:
+                i_equipamento = cadastrar_equipamento(nome_equipamento, valor,
+                                                       i_equipamento);
+                                                       break;
+        case 2:
+             editar_equipamento(nome_equipamento,valor,i_equipamento);
+                break;
+        case 3:
+                 i_chales=cadastrar_chales(codigo_chale,v_diaria,qtd_equipamentos,nome_equipamento,num_equipamentos,valor,i_chales,i_equipamento);
+                                                       break;
+        case 4:
+            editar_chale(nome_equipamento,num_equipamentos,codigo_chale,qtd_equipamentos,valor,v_diaria,i_chales,i_equipamento);
+            break;
+        case 5:
+             i_reservas=realizar_reserva(nome_equipamento,num_equipamentos,codigo_chale,codigo_reserva,qtd_equipamentos,valor,r_periodo,v_diaria,i_chales,i_equipamento,i_reservas);
+            break;
+        case 6:
+             editar_reserva(nome_equipamento,num_equipamentos,codigo_chale,codigo_reserva,qtd_equipamentos,valor,r_periodo,v_diaria,i_chales,i_equipamento,i_reservas);
+            break;
+        case 7:
+             realizar_pagamento_reserva(nome_equipamento,num_equipamentos,codigo_chale,codigo_reserva,qtd_equipamentos,
+                                        valor,r_periodo,v_diaria,i_chales,i_equipamento,i_reservas,i_pagamentos);
+                                        break;
+        case 8:
+            listar_equipamentos(nome_equipamento,valor,i_equipamento);
+                                        break;
+        case 9:
+            listar_chale(nome_equipamento,num_equipamentos,codigo_chale,codigo_reserva,qtd_equipamentos,valor,
+                                        r_periodo,v_diaria,i_chales,i_equipamento,i_reservas);
+                                        break;
+        case 10:
+            listar_reserva(nome_equipamento,num_equipamentos,codigo_chale,codigo_reserva,qtd_equipamentos,
+                                        valor,r_periodo,v_diaria,i_chales,i_equipamento,i_reservas,i_pagamentos);
+                                    break;
+         case 0:
+                printf("Saindo do programa\n");
+                break;
+        default:
+                printf("Opcao invalida\n");
+        }
+
+    }while(opcao != 0);
+
+    return 0;
+ }
